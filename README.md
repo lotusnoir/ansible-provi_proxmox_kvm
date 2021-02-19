@@ -34,13 +34,13 @@ Provisioning and modify [proxmox_vms](https://www.proxmox.com/en/) from clone te
 
 ## Proxmox Template creation steps
 
-1/ add iso file on proxmox
+- add iso file on proxmox
 node > storage > content > upload
-2/ create vm from image
-3/ install OS + packages cloud-init and qemu-guest-agent
-4/ Select vm > hardware > add > cloudinit drive
-5/ Select vm > options > qemu agent > activate both boxes
-6/ Select vm > right click > convert image to template
+- create vm from image
+- install OS + packages cloud-init and qemu-guest-agent
+- Select vm > hardware > add > cloudinit drive
+- Select vm > options > qemu agent > activate both boxes
+- Select vm > right click > convert image to template
 
 ## Role steps
 
@@ -49,8 +49,8 @@ node > storage > content > upload
 - check if vm already exists
   - no > create vm
   - yes > get vmid and node infos
-- Compare vm_configuration and vm on proxmox
-     - true > apply values on vm_configuration
+- Compare vm_configuration and vm on proxmox and set changes vars
+     - true > apply values from vm_configuration
      - false > skip
 
 
