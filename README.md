@@ -31,7 +31,6 @@ Provisioning and modify [proxmox_vms](https://www.proxmox.com/en/) from clone te
 | `proxmox_vm_format`     | qcow2          | formet of the clone vm |
 | `debug_exec`            | false          | activate ansible debug trace in case of problems |
 
-
 ## Proxmox Template creation steps
 
 - add iso file on proxmox
