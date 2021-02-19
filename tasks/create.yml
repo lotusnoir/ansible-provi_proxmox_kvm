@@ -1,0 +1,26 @@
+---
+- name: "Clone vm"
+  proxmox_kvm:
+    api_user: "{{ proxmox_api_user }}"
+    api_password: "{{ proxmox_api_pass }}"
+    api_host: "{{ proxmox_api_host }}"
+    template: yes
+    full: yes
+    clone: "{{ proxmox_template }}"       # The template vm
+    node: "{{ proxmox_template_node }}"   # The template node
+    target: "{{ vm_node }}"               # The vm install node
+    name: "{{ vm_name }}"                 # The vm install name
+    timeout: 180
+  register: vm_build
+
+- name: "Set existing node as the config one"
+  set_fact:
+    vm_exist_node: "{{ vm_node }}"
+
+- name: "Set existing id as the created one"
+  set_fact:
+    vm_id: "{{ vm_build.msg | regex_replace('.*newid ([1-9][0-9]{0,3}).*', '\\1') }}"
+
+- name: "Pause for 30sec to build server"
+  wait_for:
+    timeout: 30

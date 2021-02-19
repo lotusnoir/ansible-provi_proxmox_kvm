@@ -1,0 +1,60 @@
+---
+### Set facts from vm_
+- name: "Set facts from vm_configuration"
+  set_fact:
+    vm_name: "{{ inventory_hostname | lower }}"
+    vm_ip: "{{ item.ip }}"
+    vm_subnet: "{{ item.subnet }}"
+    vm_cluster: "{{ item.cluster }}"
+    vm_node: "{{ item.node }}"
+    vm_memory: "{{ item.memory }}"
+    vm_sockets: "{{ item.sockets | default('1') }}"
+    vm_cores: "{{ item.cores }}"
+    vm_disk: "{{ item.disk_size_GB | default('') }}"
+  with_items:
+    - "{{ vm_configuration }}"
+
+### Create ticket
+- name: "Get proxmox api ticket"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/access/ticket"
+    method: POST
+    body:
+      username: "{{ proxmox_api_user }}"
+      password: "{{ proxmox_api_pass }}"
+    validate_certs: "{{ proxmox_disable_cert_check | default('no') }}"
+    follow_redirects: all
+    body_format: form-urlencoded
+  register: proxmox_ticket
+
+- name: "DEBUG: show proxmox ticket"
+  debug:
+    msg: "{{ proxmox_ticket.json.data }}"
+  when: debug_exec
+
+### Check if vm already exists, set fact proxmox_vm_exists: false / true from result
+- include_tasks: check_exist.yml
+
+### VM doesnt not exist so we create it
+- name: "Create new vm"
+  include_tasks: create.yml
+  when: not proxmox_vm_exists
+
+### Get the vm info when exist
+- name: "Get existing vm facts"
+  include_tasks: vm_exists.yml
+
+### Get the vm info when exist
+- name: "Modify vm to be like in the desired configuration"
+  include_tasks: modify.yml
+
+### Start vm
+- name: "Start {{ vm_name }}"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/status/start"
+    method: POST
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    validate_certs: "{{ proxmox_disable_cert_check | default('no') }}"

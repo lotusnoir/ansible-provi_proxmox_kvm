@@ -1,0 +1,37 @@
+---
+# VM details to create
+#vm_configuration:
+#  - name: "vmtocreate"
+#    ip: '10.10.10.10'
+#    subnet: "3508"
+#    cluster: "localisation"
+#    node: "proxmox-node-3"
+#    memory: 2048
+#    sockets: 1
+#    cores: 1
+#    disk_size_GB: 10
+
+# Api authentification
+proxmox_api_user: 'ansible@pve'
+proxmox_api_pass: 'pve-admin-pass'
+proxmox_api_host: 'proxmox-01'
+proxmox_api_port: '8006'
+proxmox_api_scheme: 'https'
+proxmox_api_url: "{{ proxmox_api_host }}:{{ proxmox_api_port }}"
+proxmox_disable_cert_check: no
+
+# Template informations
+proxmox_template: debian-buster  # template to apply
+proxmox_template_node: proxmox-node-1
+
+# VM creation
+proxmox_vm_storage: localvm
+proxmox_vm_format: qcow2
+
+# Misc
+debug_exec: false
+proxmox_vms_all: []
+
+# Cloudinit
+#proxmox_cloudinit_user: ansible
+#proxmox_cloudinit_key:

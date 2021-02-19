@@ -1,0 +1,40 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: docker
+
+lint: |
+  yamllint .
+
+platforms:
+  - name: test-01.dvlp.example.com
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian10}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+
+provisioner:
+  name: ansible
+  playbooks:
+    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  lint: |
+    ansible-lint
+
+scenario:
+  name: default
+  test_sequence:
+    - destroy
+    - dependency
+    - lint
+    - syntax
+    - create
+    - converge
+    # - verify
+    - destroy
+
+verifier:
+  name: goss

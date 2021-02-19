@@ -1,0 +1,171 @@
+---
+### Get VM proxmox config
+- name: "GET vms proxmox infos"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/config"
+    method: GET
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+  register: proxmox_vm_config
+
+- name: "DEBUG: show existing vm config"
+  debug:
+    msg: "{{ proxmox_vm_config.json.data }}"
+  when:
+    - debug_exec
+
+- name: "Check changes from config / proxmox"
+  set_fact:
+    vm_exist_extra_disk: "{% if 'scsi1' in proxmox_vm_config.json.data %}True{% else %}False{% endif %}"
+    vm_changed_ram: "{% if vm_memory|int != proxmox_vm_config.json.data.memory|int %}True{% else %}False{% endif %}"
+    vm_changed_cores: "{% if vm_cores|int != proxmox_vm_config.json.data.cores|int %}True{% else %}False{% endif %}"
+    vm_changed_sockets: "{% if vm_sockets|int != proxmox_vm_config.json.data.sockets|int %}True{% else %}False{% endif %}"
+    vm_changed_subnet: "{% if vm_subnet|int != proxmox_vm_config.json.data.net0.split('=')[3]|int %}True{% else %}False{% endif %}"
+
+#### Stop vm to apply some changes
+#- name: "Stop {{ vm_name }}"
+#  uri:
+#    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/status/stop"
+#    method: POST
+#    headers:
+#      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+#      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+#    body_format: form-urlencoded
+#    validate_certs: "{{ proxmox_disable_cert_check | default('no') }}"
+#  when:
+#    - vm_changed_ram or vm_changed_cores or vm_changed_sockets or vm_changed_subnet or vm_exist_extra_disk
+
+
+- name: "DEBUG: show changes from config / proxmox"
+  debug:
+    msg:
+      - "vm_changed_ram: config: {{ vm_memory }} - proxmox: {{ proxmox_vm_config.json.data.memory }} - change? {{ vm_changed_ram }}"
+      - "vm_changed_cores: config: {{ vm_cores }} - proxmox: {{ proxmox_vm_config.json.data.cores }} - change? {{ vm_changed_cores }}"
+      - "vm_changed_sockets: config: {{ vm_sockets }} - proxmox: {{ proxmox_vm_config.json.data.sockets }} - change? {{ vm_changed_sockets }}"
+      - "vm_changed_subnet: config: {{ vm_subnet }} - proxmox: {{ proxmox_vm_config.json.data.net0.split('=')[3] }} - change? {{ vm_changed_subnet }}"
+  when: debug_exec
+
+- name: "Check changes on disk when extra_disk true"
+  set_fact:
+    vm_changed_disk: "{% if vm_disk+'G' != proxmox_vm_config.json.data.scsi1.split('=')[1] %}True{% else %}False{% endif %}"
+  when:
+    - vm_exist_extra_disk
+    - debug_exec
+
+- name: "DEBUG: show changes from config / proxmox"
+  debug:
+    msg:
+      - "vm_changed_disk: config: {{ vm_disk + 'G' }} - proxmox: {{ proxmox_vm_config.json.data.scsi1.split('=')[1] }} - change? {{ vm_changed_disk }}"
+      #- "vm_changed_disk: config: {{ vm_disk }} - proxmox: {{ proxmox_vm_config.json.data.scsi1| regex_replace('.*size=(.+)G$','\\1') }} - change? {{ vm_changed_disk }}"
+  when:
+    - vm_exist_extra_disk
+    - debug_exec
+
+### ADD disk or resize disk
+- name: "DEBUG: show vm_exist_extra_disk"
+  debug:
+    var: vm_exist_extra_disk
+  when:
+    - debug_exec
+
+- name: "Add extra disk on vm"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_node }}/qemu/{{ vm_id }}/config"
+    method: POST
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+    body:
+      scsi1: "pve-kosc-std:{{ vm_disk }}"
+  changed_when: true
+  when:
+    - vm_disk is defined
+    - not vm_exist_extra_disk
+
+- name: "Resize disk"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/resize"
+    method: PUT
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+    body:
+      disk: scsi1
+      size: "{{ vm_disk }}G"
+  changed_when: true
+  when:
+    - vm_exist_extra_disk
+    - vm_changed_disk
+
+
+### SET memory / cpu / core / subnet
+- name: "SET memory / cpu / core / subnet"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/config"
+    method: PUT
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+    body:
+      memory: "{{ vm_memory }}"
+      cores: "{{ vm_cores }}"
+      sockets: "{{ vm_sockets }}"
+      net0: "virtio,bridge=vmbr0,tag={{ vm_subnet }}"
+  changed_when: true
+  when:
+    - vm_changed_ram or vm_changed_cores or vm_changed_sockets or vm_changed_subnet
+
+
+### SET static ip
+- name: "DEBUG: show ipconfig configuration"
+  debug:
+    msg: ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + '.1' }}
+  when: debug_exec
+
+- name: "SET static ip"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/config"
+    method: PUT
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+    body:
+      ipconfig0: "ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + '.1' }}"
+
+
+### Migrate vm node
+- name: "DEBUG: show actual and config node"
+  debug:
+    msg: "config node: {{ vm_node }} / actual node: {{ vm_exist_node }}"
+  when: debug_exec
+
+- name: "migrate vm_node if config / exist are different"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/migrate"
+    method: post
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+    body:
+      target: "{{ vm_node }}"
+  changed_when: true
+  when:
+    - vm_exist_node is defined
+    - vm_node != vm_exist_node

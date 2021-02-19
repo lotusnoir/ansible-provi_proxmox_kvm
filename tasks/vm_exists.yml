@@ -1,0 +1,29 @@
+---
+- name: "Get node that vm is currently running on"
+  set_fact:
+    vm_exist_node: "{{ item.item.node }}"
+  when:
+    - vm_name in item.json.data|json_query('[*].name')
+  loop: "{{ proxmox_vms.results }}"
+  no_log: True
+
+- name: "DEBUG: show existing vm node"
+  debug:
+    var: vm_exist_node
+  when: debug_exec
+
+
+- name: "Get id of the existing vm"
+  set_fact:
+    vm_id: "{{ item.json.data | json_query(jq) }}"
+  vars:
+    jq: "[? name=='{{ vm_name }}'].vmid | [0]"
+  when:
+    - vm_name in item.json.data|json_query('[*].name')
+  loop: "{{ proxmox_vms.results }}"
+  no_log: True
+
+- name: "DEBUG: show existing vm id"
+  debug:
+    var: vm_id
+  when: debug_exec

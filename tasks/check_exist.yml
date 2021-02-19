@@ -1,0 +1,57 @@
+---
+- name: "Get list of proxmox nodes"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes"
+    method: GET
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ proxmox_disable_cert_check | default('no') }}"
+  register: proxmox_nodes
+
+- name: "DEBUG: list nodes"
+  debug:
+    msg: "{{ proxmox_nodes | json_query('json.data[*].node') }}"
+  when: debug_exec
+
+- name: "Get list of vms for each node"
+  uri:
+    url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ item.node }}/qemu"
+    method: GET
+    headers:
+      Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
+    body_format: form-urlencoded
+    return_content: yes
+    validate_certs: "{{ pve_disable_cert_check | default('no') }}"
+  loop: "{{ proxmox_nodes.json.data }}"
+  register: proxmox_vms
+  no_log: True
+
+- name: "Merge all vms from different nodes"
+  set_fact:
+    proxmox_vms_all: "{{ proxmox_vms_all + item.json.data }}"
+  loop: "{{ proxmox_vms.results }}"
+  no_log: true
+
+- name: "DEBUG: list vms"
+  debug:
+    msg: "{{ proxmox_vms_all | json_query('[*].name') }}"
+  when: debug_exec
+
+- name: "vm already exists"
+  set_fact:
+    proxmox_vm_exists: True
+  when:
+    - vm_name in proxmox_vms_all|json_query('[*].name')
+
+- name: "vm does not exist"
+  set_fact:
+    proxmox_vm_exists: False
+  when:
+    - vm_name not in proxmox_vms_all|json_query('[*].name')
+
+- name: "DEBUG: Is {{ vm_name }} already present"
+  debug:
+    var: proxmox_vm_exists
+  when: debug_exec

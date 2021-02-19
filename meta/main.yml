@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  author: "Philippe leal"
+  description: "Provisioning and modify kvm vms from clone image on proxmox hypervisor"
+  role_name: provi_proxmox_kvm
+  license: "license: Apache License, Version 2.0"
+  min_ansible_version: 2.8
+
+  platforms:
+    - name: "Ubuntu"
+      versions:
+        - "focal"
+        - "xenial"
+    - name: "Debian"
+      versions:
+        - "buster"
+        - "stretch"
+
+  galaxy_tags:
+    - proxmox
+    - provisioning
+    - kvm
+    - clone
+
+dependencies: []
