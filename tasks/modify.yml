@@ -81,7 +81,7 @@
     body_format: form-urlencoded
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
     body:
-      scsi1: "pve-kosc-std:{{ vm_disk }}"
+      scsi1: "{{ proxmox_vm_storage }}:{{ vm_disk }}"
   changed_when: true
   when:
     - vm_disk is defined
