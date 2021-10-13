@@ -6,7 +6,7 @@
     headers:
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ proxmox_disable_cert_check | default('no') }}"
   register: proxmox_nodes
 
@@ -22,11 +22,11 @@
     headers:
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
   loop: "{{ proxmox_nodes.json.data }}"
   register: proxmox_vms
-  no_log: True
+  no_log: true
 
 - name: "Merge all vms from different nodes"
   set_fact:
@@ -41,13 +41,13 @@
 
 - name: "vm already exists"
   set_fact:
-    proxmox_vm_exists: True
+    proxmox_vm_exists: true
   when:
     - vm_name in proxmox_vms_all|json_query('[*].name')
 
 - name: "vm does not exist"
   set_fact:
-    proxmox_vm_exists: False
+    proxmox_vm_exists: false
   when:
     - vm_name not in proxmox_vms_all|json_query('[*].name')
 

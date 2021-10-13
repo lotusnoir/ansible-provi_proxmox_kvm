@@ -7,7 +7,7 @@
     headers:
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
   register: proxmox_vm_config
 
@@ -97,7 +97,7 @@
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
     body:
       disk: scsi1
@@ -117,7 +117,7 @@
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
     body:
       memory: "{{ vm_memory }}"
@@ -143,7 +143,7 @@
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
     body:
       ipconfig0: "ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + net_gateway }}"
@@ -164,7 +164,7 @@
       Cookie: "PVEAuthCookie={{ proxmox_ticket.json.data.ticket }}"
       CSRFPreventionToken: "{{ proxmox_ticket.json.data.CSRFPreventionToken }}"
     body_format: form-urlencoded
-    return_content: yes
+    return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
     body:
       target: "{{ vm_node }}"
