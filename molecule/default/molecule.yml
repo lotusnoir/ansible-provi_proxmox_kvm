@@ -1,40 +1,76 @@
 ---
 dependency:
   name: galaxy
-
 driver:
   name: docker
-
-lint: |
-  yamllint .
-
 platforms:
-  - name: test-01.dvlp.example.com
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-debian10}-ansible:latest"
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
+  - name: ubuntu18_provi_proxmox_kvm
+    pre_build_image: true
+    image: lotusnoir/ansible_molecule_test_images:ubuntu18
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    privileged: true
+  - name: ubuntu20_provi_proxmox_kvm
     pre_build_image: true
-
+    image: lotusnoir/ansible_molecule_test_images:ubuntu20
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - python3
+  - name: debian10_provi_proxmox_kvm
+    pre_build_image: true
+    image: lotusnoir/ansible_molecule_test_images:debian10
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: debian11_provi_proxmox_kvm
+    pre_build_image: true
+    image: lotusnoir/ansible_molecule_test_images:debian11
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: centos7_provi_proxmox_kvm
+    pre_build_image: true
+    image: lotusnoir/ansible_molecule_test_images:centos7
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+  - name: centos8_provi_proxmox_kvm
+    pre_build_image: true
+    image: lotusnoir/ansible_molecule_test_images:centos8
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - python3
+  - name: rocky8_provi_proxmox_kvm
+    pre_build_image: true
+    image: lotusnoir/ansible_molecule_test_images:rocky8
+    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    groups:
+      - python3
 provisioner:
   name: ansible
   playbooks:
-    converge: ${MOLECULE_PLAYBOOK:-converge.yml}
-  lint: |
-    ansible-lint
-
-scenario:
-  name: default
-  test_sequence:
-    - destroy
-    - dependency
-    - lint
-    - syntax
-    - create
-    - converge
-    # - verify
-    - destroy
+    prepare: prepare.yml
+    converge: playbook.yml
+  inventory:
+    group_vars:
+      python3:
+        ansible_python_interpreter: /usr/bin/python3
+    host_vars:
+      bullseye:
+        ansible_python_interpreter: "/usr/bin/python3.9"
 
 verifier:
   name: goss

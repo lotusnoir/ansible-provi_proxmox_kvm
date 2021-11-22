@@ -1,0 +1,74 @@
+---
+stages:
+  - checks
+  - changes
+  - push
+
+variables:
+  GITHUB_USER: lotusnoir
+
+
+##################################################
+# SYNTAX CHECKS
+##################################################
+yamllint:
+  stage: checks
+  image: sdesbure/yamllint
+  before_script:
+    - yamllint --version
+  script:
+    - yamllint .
+
+ansible-lint:
+  stage: checks
+  image: lotusnoir/ansible_play
+  script:
+    - ansible-lint .
+
+
+######################################################
+# GENERATE CHANGELOG FILE
+######################################################
+changelog:
+  stage: changes
+  image: node:latest
+  needs:
+    - yamllint
+    - ansible-lint
+  artifacts:
+    paths:
+      - CHANGELOG.md
+    expire_in: 1 day
+  before_script:
+    - npm install -g auto-changelog
+  script:
+    - auto-changelog -t keepachangelog --sort-commits date-desc --hide-empty-releases --hide-credit -l 10 -b 10
+
+
+###################################################
+## PUSH CODE WHEN ALL TEST OK
+###################################################
+push_src_on_github:
+  stage: push
+  image: alpine:latest
+  needs:
+    - changelog
+  before_script:
+    - apk add git openssh-client
+    - eval $(ssh-agent -s)
+    - echo "${GITHUB_USER_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tUser ansible\n\tStrictHostKeyChecking no\n\tForwardAgent yes\n\n" > ~/.ssh/config
+    - git config --global user.email "${GITHUB_USER_EMAIL}"
+    - git config --global user.name "${GITHUB_USER}"
+    - git config --global init.defaultBranch main
+    - COMMENT=$(git log -1 --pretty=%B | head -1)
+  script:
+    - git clone git@github.com:${GITHUB_USER}/ansible-provi_proxmox_kvm.git /tmp/ansible-provi_proxmox_kvm
+    - rm -rf .git
+    - cp -r . /tmp/ansible-provi_proxmox_kvm/
+    - cd /tmp/ansible-provi_proxmox_kvm
+    - git add -A
+    - git commit -m "${COMMENT}" || echo "No changes, nothing to commit!"
+    - git push --follow-tags

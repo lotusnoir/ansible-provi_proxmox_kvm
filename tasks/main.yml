@@ -7,7 +7,7 @@
     vm_subnet: "{{ item.subnet }}"
     vm_cluster: "{{ item.cluster }}"
     vm_node: "{{ item.node }}"
-    vm_memory: "{{ item.memory }}"
+    vm_memory: "{{ item.memory * 1024 }}"
     vm_sockets: "{{ item.sockets | default('1') }}"
     vm_cores: "{{ item.cores }}"
     vm_disk: "{{ item.disk_size_GB | default('') }}"

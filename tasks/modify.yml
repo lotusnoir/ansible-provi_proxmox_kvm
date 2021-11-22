@@ -69,7 +69,7 @@
 ### ADD disk or resize disk
 - name: "DEBUG: show vm_exist_extra_disk"
   debug:
-    msg: 
+    msg:
       - "vm_disk: {{ vm_disk }}"
       - "vm_exist_extra_disk: {{ vm_exist_extra_disk }}"
   when:

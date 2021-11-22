@@ -6,7 +6,7 @@
 #    subnet: "3508"
 #    cluster: "localisation"
 #    node: "proxmox-node-3"
-#    memory: 2048
+#    memory: 2
 #    sockets: 1
 #    cores: 1
 #    disk_size_GB: 10
