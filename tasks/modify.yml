@@ -109,7 +109,7 @@
   when:
     - vm_disk is defined
     - vm_exist_extra_disk
-    - vm_changed_disk is defined
+    - vm_changed_disk is defined and vm_changed_disk
 
 
 ### SET memory / cpu / core / subnet
