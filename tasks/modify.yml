@@ -39,10 +39,10 @@
 #  when:
 #    - vm_changed_ram or vm_changed_cores or vm_changed_sockets or vm_changed_subnet or vm_exist_extra_disk
 
-
 - name: "DEBUG: show changes from config / proxmox"
   debug:
     msg:
+      - "vm_exist_extra_disk: config: {{ vm_disk }} - change? {{ vm_exist_extra_disk }}"
       - "vm_changed_ram: config: {{ vm_memory }} - proxmox: {{ proxmox_vm_config.json.data.memory }} - change? {{ vm_changed_ram }}"
       - "vm_changed_cores: config: {{ vm_cores }} - proxmox: {{ proxmox_vm_config.json.data.cores }} - change? {{ vm_changed_cores }}"
       - "vm_changed_sockets: config: {{ vm_sockets }} - proxmox: {{ proxmox_vm_config.json.data.sockets }} - change? {{ vm_changed_sockets }}"
@@ -50,10 +50,11 @@
       - "net_gateway: {{ net_gateway }}"
   when: debug_exec
 
-- name: "Check changes on disk when extra_disk true"
+- name: "Check if disk size in config is sameas in hypervisor"
   set_fact:
     vm_changed_disk: "{% if vm_disk+'G' != proxmox_vm_config.json.data.scsi1.split('=')[1] %}True{% else %}False{% endif %}"
   when:
+    - vm_disk is defined
     - vm_exist_extra_disk
     - debug_exec
 
@@ -89,7 +90,7 @@
   changed_when: true
   when:
     - vm_disk is defined
-    - vm_exist_extra_disk
+    - not vm_exist_extra_disk
 
 - name: "Resize disk"
   uri:
@@ -106,6 +107,7 @@
       size: "{{ vm_disk }}G"
   changed_when: true
   when:
+    - vm_disk is defined
     - vm_exist_extra_disk
     - vm_changed_disk is defined
 
