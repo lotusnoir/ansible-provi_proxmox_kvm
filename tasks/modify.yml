@@ -69,7 +69,9 @@
 ### ADD disk or resize disk
 - name: "DEBUG: show vm_exist_extra_disk"
   debug:
-    var: vm_exist_extra_disk
+    msg: 
+      - "vm_disk: {{ vm_disk }}"
+      - "vm_exist_extra_disk: {{ vm_exist_extra_disk }}"
   when:
     - debug_exec
 
@@ -87,7 +89,7 @@
   changed_when: true
   when:
     - vm_disk is defined
-    - not vm_exist_extra_disk
+    - vm_exist_extra_disk
 
 - name: "Resize disk"
   uri:
