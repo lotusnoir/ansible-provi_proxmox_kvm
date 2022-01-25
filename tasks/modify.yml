@@ -127,7 +127,7 @@
       memory: "{{ vm_memory }}"
       cores: "{{ vm_cores }}"
       sockets: "{{ vm_sockets }}"
-      net0: "virtio,bridge=vmbr0,tag={{ vm_subnet }}"
+      net0: "virtio,bridge=vmbr0{% if vm_subnet != ''%},tag={{ vm_subnet }}{% endif %}"
   changed_when: true
   when:
     - vm_changed_ram or vm_changed_cores or vm_changed_sockets or vm_changed_subnet

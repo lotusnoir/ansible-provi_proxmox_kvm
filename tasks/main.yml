@@ -4,8 +4,8 @@
   set_fact:
     vm_name: "{{ inventory_hostname | lower }}"
     vm_ip: "{{ item.ip }}"
-    vm_subnet: "{{ item.subnet }}"
-    vm_cluster: "{{ item.cluster }}"
+    vm_subnet: "{{ item.subnet | default('') }}"
+    vm_cluster: "{{ item.cluster | default('') }}"
     vm_node: "{{ item.node }}"
     vm_memory: "{{ item.memory * 1024 }}"
     vm_sockets: "{{ item.sockets | default('1') }}"
