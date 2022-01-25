@@ -23,4 +23,4 @@
 
 - name: "Pause for 30sec to build server"
   wait_for:
-    timeout: 30
+    timeout: "{{ proxmox_clone_wait }}"

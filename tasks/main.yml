@@ -4,6 +4,8 @@
   set_fact:
     vm_name: "{{ inventory_hostname | lower }}"
     vm_ip: "{{ item.ip }}"
+    vm_ip_mask: "{{ item.ip_mask | default('') }}"
+    vm_ip_gw: "{{ item.ip_gw | default('') }}"
     vm_subnet: "{{ item.subnet | default('') }}"
     vm_cluster: "{{ item.cluster | default('') }}"
     vm_node: "{{ item.node }}"

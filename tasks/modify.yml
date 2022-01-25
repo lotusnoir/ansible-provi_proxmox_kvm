@@ -23,8 +23,8 @@
     vm_changed_ram: "{% if vm_memory|int != proxmox_vm_config.json.data.memory|int %}True{% else %}False{% endif %}"
     vm_changed_cores: "{% if vm_cores|int != proxmox_vm_config.json.data.cores|int %}True{% else %}False{% endif %}"
     vm_changed_sockets: "{% if vm_sockets|int != proxmox_vm_config.json.data.sockets|int %}True{% else %}False{% endif %}"
-    vm_changed_subnet: "{% if vm_subnet|int != proxmox_vm_config.json.data.net0.split('=')[3]|int %}True{% else %}False{% endif %}"
-    net_gateway: "{% if vm_cluster == 'enix' %}.1{% else %}.254{% endif %}"
+    vm_changed_subnet: "{% if (vm_subnet != '') and (vm_subnet|int != proxmox_vm_config.json.data.net0.split('=')[3]|int) %}True{% else %}False{% endif %}"
+    vm_net_gateway: "{% if vm_cluster == 'enix' %}.1{% else %}{{ vm_ip_gw }}{% endif %}"
 
 #### Stop vm to apply some changes
 #- name: "Stop {{ vm_name }}"
@@ -46,8 +46,8 @@
       - "vm_changed_ram: config: {{ vm_memory }} - proxmox: {{ proxmox_vm_config.json.data.memory }} - change? {{ vm_changed_ram }}"
       - "vm_changed_cores: config: {{ vm_cores }} - proxmox: {{ proxmox_vm_config.json.data.cores }} - change? {{ vm_changed_cores }}"
       - "vm_changed_sockets: config: {{ vm_sockets }} - proxmox: {{ proxmox_vm_config.json.data.sockets }} - change? {{ vm_changed_sockets }}"
-      - "vm_changed_subnet: config: {{ vm_subnet }} - proxmox: {{ proxmox_vm_config.json.data.net0.split('=')[3] }} - change? {{ vm_changed_subnet }}"
-      - "net_gateway: {{ net_gateway }}"
+      - "{% if vm_subnet != '' %}vm_changed_subnet: config: {{ vm_subnet }} - proxmox: {{ proxmox_vm_config.json.data.net0.split('=')[3] }} - change? {{ vm_changed_subnet }}{% endif %}"
+      - "vm_net_gateway: {{ vm_net_gateway }}"
   when: debug_exec
 
 - name: "Check if disk size in config is sameas in hypervisor"
@@ -136,7 +136,7 @@
 ### SET static ip
 - name: "DEBUG: show ipconfig configuration"
   debug:
-    msg: ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + net_gateway }}
+    msg: "ip={{ vm_ip }}/{% if vm_ip_mask != '' %}{{ vm_ip_mask }}{% endif %},{% if vm_ip_gw != '' %}gw={{ vm_ip_gw }}{% else %}gw={{ vm_ip.split('.')[0:3] | join('.') + vm_net_gateway }}{% endif %}"
   when: debug_exec
 
 - name: "SET static ip"
@@ -150,8 +150,8 @@
     return_content: 'yes'
     validate_certs: "{{ pve_disable_cert_check | default('no') }}"
     body:
-      ipconfig0: "ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + net_gateway }}"
-      #ipconfig0: "ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + '.1' }}"
+      #ipconfig0: "ip={{ vm_ip }}/24,gw={{ vm_ip.split('.')[0:3] | join('.') + vm_net_gateway }}"
+      ipconfig0: "ip={{ vm_ip }}/{% if vm_ip_mask != '' %}{{ vm_ip_mask }}{% endif %},{% if vm_ip_gw != '' %}gw={{ vm_ip_gw }}{% else %}gw={{ vm_ip.split('.')[0:3] | join('.') + vm_net_gateway }}{% endif %}"
 
 
 ### Migrate vm node
