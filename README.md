@@ -44,9 +44,9 @@ node > storage > content > upload
 
         ---
         - hosts: provi_proxmox_kvm
-          become: yes
+          become: true
           become_method: sudo
-          gather_facts: yes
+          gather_facts: true
           roles:
             - role: ansible-provi_proxmox_kvm
           vars:
