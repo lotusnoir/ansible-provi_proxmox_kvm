@@ -66,6 +66,7 @@ push_src_on_github:
     - COMMENT=$(git log -1 --pretty=%B | head -1)
   script:
     - git clone git@github.com:${GITHUB_USER}/ansible-provi_proxmox_kvm.git /tmp/ansible-provi_proxmox_kvm
+    - find /tmp/ansible-provi_proxmox_kvm -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf "{}" +;
     - rm -rf .git
     - cp -r . /tmp/ansible-provi_proxmox_kvm/
     - cd /tmp/ansible-provi_proxmox_kvm

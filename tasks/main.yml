@@ -1,7 +1,7 @@
 ---
 ### Set facts from vm_
 - name: "Set facts from vm_configuration"
-  set_fact:
+  ansible.builtin.set_fact:
     vm_name: "{{ inventory_hostname | lower }}"
     vm_ip: "{{ item.ip }}"
     vm_ip_mask: "{{ item.ip_mask | default('') }}"
@@ -18,7 +18,7 @@
 
 ### Create ticket
 - name: "Get proxmox api ticket"
-  uri:
+  ansible.builtin.uri:
     url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/access/ticket"
     method: POST
     body:
@@ -30,7 +30,7 @@
   register: proxmox_ticket
 
 - name: "DEBUG: show proxmox ticket"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ proxmox_ticket.json.data }}"
   when: debug_exec
 
@@ -52,7 +52,7 @@
 
 ### Start vm
 - name: "Start {{ vm_name }}"
-  uri:
+  ansible.builtin.uri:
     url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/status/start"
     method: POST
     headers:

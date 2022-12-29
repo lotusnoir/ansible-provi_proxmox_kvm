@@ -4,9 +4,9 @@
 
 [![Galaxy Role](https://img.shields.io/badge/galaxy-provi_proxmox_kvm-purple?style=flat)](https://galaxy.ansible.com/lotusnoir/provi_proxmox_kvm)
 [![Version](https://img.shields.io/github/release/lotusnoir/ansible-provi_proxmox_kvm.svg)](https://github.com/lotusnoir/ansible-provi_proxmox_kvm/releases/latest)
-![GitHub repo size](https://img.shields.io/github/repo-size/lotusnoir/ansible-provi_proxmox_kvm?color=orange&style=flat)
+[![GitHub repo size](https://img.shields.io/github/repo-size/lotusnoir/ansible-provi_proxmox_kvm?color=orange&style=flat)](https://galaxy.ansible.com/lotusnoir/provi_proxmox_kvm)
 [![downloads](https://img.shields.io/ansible/role/d/53224)](https://galaxy.ansible.com/lotusnoir/provi_proxmox_kvm)
-![Ansible Quality Score](https://img.shields.io/ansible/quality/53224)
+[![Ansible Quality Score](https://img.shields.io/ansible/quality/53224)](https://galaxy.ansible.com/lotusnoir/provi_proxmox_kvm)
 [![License](https://img.shields.io/badge/license-Apache--2.0-brightgreen?style=flat)](https://opensource.org/licenses/Apache-2.0)
 
 Provisioning and modify [proxmox_vms](https://www.proxmox.com/en/) from clone template

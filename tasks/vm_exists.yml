@@ -1,6 +1,6 @@
 ---
 - name: "Get node that vm is currently running on"
-  set_fact:
+  ansible.builtin.set_fact:
     vm_exist_node: "{{ item.item.node }}"
   when:
     - vm_name in item.json.data|json_query('[*].name')
@@ -8,13 +8,13 @@
   no_log: true
 
 - name: "DEBUG: show existing vm node"
-  debug:
+  ansible.builtin.debug:
     var: vm_exist_node
   when: debug_exec
 
 
 - name: "Get id of the existing vm"
-  set_fact:
+  ansible.builtin.set_fact:
     vm_id: "{{ item.json.data | json_query(jq) }}"
   vars:
     jq: "[? name=='{{ vm_name }}'].vmid | [0]"
@@ -24,6 +24,6 @@
   no_log: true
 
 - name: "DEBUG: show existing vm id"
-  debug:
+  ansible.builtin.debug:
     var: vm_id
   when: debug_exec
