@@ -35,20 +35,21 @@
   when: debug_exec
 
 ### Check if vm already exists, set fact proxmox_vm_exists: false / true from result
-- include_tasks: check_exist.yml
+- name: "Check exists"
+  ansible.builtin.include_tasks: check_exist.yml
 
 ### VM doesnt not exist so we create it
 - name: "Create new vm"
-  include_tasks: create.yml
+  ansible.builtin.include_tasks: create.yml
   when: not proxmox_vm_exists
 
 ### Get the vm info when exist
 - name: "Get existing vm facts"
-  include_tasks: vm_exists.yml
+  ansible.builtin.include_tasks: vm_exists.yml
 
 ### Get the vm info when exist
 - name: "Modify vm to be like in the desired configuration"
-  include_tasks: modify.yml
+  ansible.builtin.include_tasks: modify.yml
 
 ### Start vm
 - name: "Start {{ vm_name }}"

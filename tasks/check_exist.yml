@@ -39,19 +39,19 @@
     msg: "{{ proxmox_vms_all | json_query('[*].name') }}"
   when: debug_exec
 
-- name: "vm already exists"
+- name: "VM already exists"
   ansible.builtin.set_fact:
     proxmox_vm_exists: true
   when:
     - vm_name in proxmox_vms_all|json_query('[*].name')
 
-- name: "vm does not exist"
+- name: "VM does not exist"
   ansible.builtin.set_fact:
     proxmox_vm_exists: false
   when:
     - vm_name not in proxmox_vms_all|json_query('[*].name')
 
-- name: "DEBUG: Is {{ vm_name }} already present"
+- name: "DEBUG: vm already present"
   ansible.builtin.debug:
     var: proxmox_vm_exists
   when: debug_exec

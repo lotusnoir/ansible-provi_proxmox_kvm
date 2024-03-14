@@ -1,6 +1,6 @@
 ---
 - name: "Start vm"
-  proxmox:
+  community.general.proxmox:
     vmid: "{{ vm_id }}"
     api_user: "{{ proxmox_api_user }}"
     api_password: "{{ proxmox_api_pass }}"

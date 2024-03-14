@@ -20,10 +20,10 @@
 - name: "Check changes from config / proxmox"
   ansible.builtin.set_fact:
     vm_exist_extra_disk: "{% if 'scsi1' in proxmox_vm_config.json.data %}True{% else %}False{% endif %}"
-    vm_changed_ram: "{% if vm_memory|int != proxmox_vm_config.json.data.memory|int %}True{% else %}False{% endif %}"
-    vm_changed_cores: "{% if vm_cores|int != proxmox_vm_config.json.data.cores|int %}True{% else %}False{% endif %}"
-    vm_changed_sockets: "{% if vm_sockets|int != proxmox_vm_config.json.data.sockets|int %}True{% else %}False{% endif %}"
-    vm_changed_subnet: "{% if (vm_subnet != '') and (vm_subnet|int != proxmox_vm_config.json.data.net0.split('=')[3]|int) %}True{% else %}False{% endif %}"
+    vm_changed_ram: "{% if vm_memory | int != proxmox_vm_config.json.data.memory | int %}True{% else %}False{% endif %}"
+    vm_changed_cores: "{% if vm_cores | int != proxmox_vm_config.json.data.cores | int %}True{% else %}False{% endif %}"
+    vm_changed_sockets: "{% if vm_sockets | int != proxmox_vm_config.json.data.sockets | int %}True{% else %}False{% endif %}"
+    vm_changed_subnet: "{% if (vm_subnet != '') and (vm_subnet | int != proxmox_vm_config.json.data.net0.split('=')[3] | int) %}True{% else %}False{% endif %}"
     vm_net_gateway: "{% if vm_cluster == 'enix' %}.1{% else %}{{ vm_ip_gw }}{% endif %}"
 
 #### Stop vm to apply some changes
@@ -52,7 +52,7 @@
 
 - name: "Check if disk size in config is sameas in hypervisor"
   ansible.builtin.set_fact:
-    vm_changed_disk: "{% if vm_disk+'G' != proxmox_vm_config.json.data.scsi1.split('=')[1] %}True{% else %}False{% endif %}"
+    vm_changed_disk: "{% if vm_disk + 'G' != proxmox_vm_config.json.data.scsi1.split('=')[1] %}True{% else %}False{% endif %}"
   when:
     - vm_disk is defined
     - vm_exist_extra_disk
@@ -127,7 +127,7 @@
       memory: "{{ vm_memory }}"
       cores: "{{ vm_cores }}"
       sockets: "{{ vm_sockets }}"
-      net0: "virtio,bridge=vmbr0{% if vm_subnet != ''%},tag={{ vm_subnet }}{% endif %}"
+      net0: "virtio,bridge=vmbr0{% if vm_subnet != '' %},tag={{ vm_subnet }}{% endif %}"
   changed_when: true
   when:
     - vm_changed_ram or vm_changed_cores or vm_changed_sockets or vm_changed_subnet
@@ -160,7 +160,7 @@
     msg: "config node: {{ vm_node }} / actual node: {{ vm_exist_node }}"
   when: debug_exec
 
-- name: "migrate vm_node if config / exist are different"
+- name: "Migrate vm_node if config / exist are different"
   ansible.builtin.uri:
     url: "{{ proxmox_api_scheme }}://{{ proxmox_api_url }}/api2/json/nodes/{{ vm_exist_node }}/qemu/{{ vm_id }}/migrate"
     method: post

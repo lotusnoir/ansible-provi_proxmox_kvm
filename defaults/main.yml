@@ -26,7 +26,7 @@ proxmox_template_node: proxmox-node-1
 
 # VM creation
 proxmox_vm_storage: localvm
-proxmox_vm_format: qcow2
+#proxmox_vm_format: qcow2
 
 # Misc
 debug_exec: false
