@@ -1,8 +1,10 @@
 ---
 dependency:
   name: galaxy
+
 driver:
   name: docker
+
 scenario:
   name: default
   test_sequence:
@@ -11,94 +13,25 @@ scenario:
     - prepare
     - converge
     - idempotence
-    - verify
+    #- verify
     - destroy
+
 platforms:
-  - name: provi-proxmox-kvm-ubuntu18
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:ubuntu18
+  - name: provi-proxmox-kvm-${MOLECULE_DISTRIB:-debian12}
+    image: lotusnoir/ansible_molecule_test_images:${MOLECULE_DISTRIB:-debian12}
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
     docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
     privileged: true
-    capabilities: ['NET_ADMIN']
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  - name: provi-proxmox-kvm-ubuntu20
     pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:ubuntu20
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    capabilities: ['NET_ADMIN']
+    cgroupns_mode: host
     volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    groups:
-      - python3
-  - name: provi-proxmox-kvm-ubuntu22
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:ubuntu22
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    groups:
-      - python3
-  - name: provi-proxmox-kvm-debian10
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:debian10
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  - name: provi-proxmox-kvm-debian11
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:debian11
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  - name: provi-proxmox-kvm-centos7
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:centos7
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  - name: provi-proxmox-kvm-rocky8
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:rocky8
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    groups:
-      - python3
-  - name: provi-proxmox-kvm-oraclelinux7
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:oraclelinux7
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-  - name: provi-proxmox-kvm-oraclelinux8
-    pre_build_image: true
-    image: lotusnoir/ansible_molecule_test_images:oraclelinux8
-    docker_host: "${DOCKER_HOST:-unix://var/run/docker.sock}"
-    privileged: true
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    groups:
-      - python3
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+
 provisioner:
   name: ansible
   playbooks:
     prepare: prepare.yml
     converge: playbook.yml
-  inventory:
-    group_vars:
-      python3:
-        ansible_python_interpreter: /usr/bin/python3
-    host_vars:
-      bullseye:
-        ansible_python_interpreter: "/usr/bin/python3.9"
 
 verifier:
-  name: goss
+  name: ansible

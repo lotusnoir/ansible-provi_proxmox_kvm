@@ -1,0 +1,47 @@
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: check-byte-order-marker
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: check-yaml
+        files: .*\.(yaml|yml)$
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.32.0
+    hooks:
+      - id: yamllint
+        files: \.(yaml|yml)$
+        types: [file, yaml]
+        entry: yamllint --strict -f parsable
+
+  - repo: https://github.com/ansible-community/ansible-lint
+    rev: v6.22.2
+    hooks:
+      - id: ansible-lint
+        files: \.(yaml|yml)$
+        entry: ansible-lint --force-color
+        exclude: ^molecule/
+
+  #- repo: https://github.com/kadrach/pre-commit-gitlabci-lint
+  #  rev: 22d0495c9894e8b27cc37c2ed5d9a6b46385a44c
+  #  hooks:
+  #    - id: gitlabci-lint
+
+  - repo: https://github.com/robertdebock/pre-commit
+    rev: v1.5.2
+    hooks:
+      - id: ansible_role_find_unused_variable
+      - id: ansible_role_find_empty_files
+      - id: ansible_role_find_empty_directories
+      - id: ansible_role_fix_readability
+      - id: ansible_role_find_undefined_handlers
+      - id: ansible_role_find_unquoted_values

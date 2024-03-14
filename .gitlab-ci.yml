@@ -1,29 +1,12 @@
 ---
 stages:
-  - checks
   - changes
   - push
 
 variables:
   GITHUB_USER: lotusnoir
-
-
-##################################################
-# SYNTAX CHECKS
-##################################################
-yamllint:
-  stage: checks
-  image: sdesbure/yamllint
-  before_script:
-    - yamllint --version
-  script:
-    - yamllint .
-
-ansible-lint:
-  stage: checks
-  image: lotusnoir/ansible_play
-  script:
-    - ansible-lint .
+  ANSIBLE_REMOTE_TMP: /tmp
+  PY_COLORS: 1
 
 
 ######################################################
@@ -31,10 +14,7 @@ ansible-lint:
 ######################################################
 changelog:
   stage: changes
-  image: node:latest
-  needs:
-    - yamllint
-    - ansible-lint
+  image: node:19
   artifacts:
     paths:
       - CHANGELOG.md
